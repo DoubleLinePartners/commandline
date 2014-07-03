@@ -18,13 +18,20 @@ namespace CommandLine.Core
             var errors = new List<Error>();
             Action<Error> onError = e => errors.Add(e);
 
-            var tokens = from arg in arguments
-                         from token in !arg.StartsWith("-", StringComparison.Ordinal)
-                               ? new Token[] { Token.Value(arg) }
-                               : arg.StartsWith("--", StringComparison.Ordinal)
-                                     ? TokenizeLongName(arg, onError)
-                                     : TokenizeShortName(arg, nameLookup)
-                         select token;
+            var tokens = new List<Token>();
+
+            foreach (var arg in arguments)
+            {
+                if (!arg.StartsWith("-", StringComparison.Ordinal))
+                {
+                    tokens.Add(Token.Value(arg));
+                }
+                else
+                {
+                    var longNameTokens = TokenizeLongName(arg, onError).ToList();
+                    tokens.AddRange(longNameTokens.Any() ? longNameTokens : TokenizeShortName(arg, nameLookup));
+                }
+            }
 
             var unkTokens = from t in tokens where t.IsName() && !nameLookup(t.Text) select t;
 
@@ -115,6 +122,26 @@ namespace CommandLine.Core
                     yield break;
                 }
                 if (equalIndex == 1) // "--="
+                {
+                    onError(new BadFormatTokenError(value));
+                    yield break;
+                }
+                var parts = text.Split('=');
+                yield return Token.Name(parts[0]);
+                yield return Token.Value(parts[1]);
+                yield break;
+            }
+
+            if (value.Length > 1 && value.StartsWith("-", StringComparison.Ordinal))
+            {
+                var text = value.Substring(1);
+                var equalIndex = text.IndexOf('=');
+                if (equalIndex <= 0)
+                {
+                    yield return Token.Name(text);
+                    yield break;
+                }
+                if (equalIndex == 1) // "-="
                 {
                     onError(new BadFormatTokenError(value));
                     yield break;

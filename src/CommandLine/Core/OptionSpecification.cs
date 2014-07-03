@@ -8,12 +8,22 @@ namespace CommandLine.Core
     internal sealed class OptionSpecification : Specification
     {
         private readonly string shortName;
-        private readonly string longName;
+        private readonly string[] longName;
         private readonly string setName;
         private readonly string helpText;
         private readonly string metaValue;
 
         public OptionSpecification(string shortName, string longName, bool required, string setName, int min, int max, Maybe<object> defaultValue, System.Type conversionType, string helpText, string metaValue)
+            : base(SpecificationType.Option, required, min, max, defaultValue, conversionType)
+        {
+            this.shortName = shortName;
+            this.longName = new []{ longName};
+            this.setName = setName;
+            this.helpText = helpText;
+            this.metaValue = metaValue;
+        }
+
+        public OptionSpecification(string shortName, string[] longName, bool required, string setName, int min, int max, Maybe<object> defaultValue, System.Type conversionType, string helpText, string metaValue)
             : base(SpecificationType.Option, required, min, max, defaultValue, conversionType)
         {
             this.shortName = shortName;
@@ -43,7 +53,7 @@ namespace CommandLine.Core
             get { return this.shortName; }
         }
 
-        public string LongName
+        public string[] LongName
         {
             get { return this.longName; }
         }

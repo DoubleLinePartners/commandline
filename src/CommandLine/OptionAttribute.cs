@@ -11,7 +11,7 @@ namespace CommandLine
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
     public sealed class OptionAttribute : Attribute
     {
-        private readonly string longName;
+        private readonly string[] longName;
         private readonly string shortName;
         private string setName;
         private int min;
@@ -26,7 +26,21 @@ namespace CommandLine
             if (longName == null) throw new ArgumentNullException("longName");
 
             this.shortName = shortName;
-            this.longName = longName;
+            this.longName = new []{ longName};
+            this.setName = string.Empty;
+            this.min = -1;
+            this.max = -1;
+            this.helpText = string.Empty;
+            this.metaValue = string.Empty;
+        }
+
+        private OptionAttribute(string shortName, string[] longName)
+        {
+            if (shortName == null) throw new ArgumentNullException("shortName");
+            if (longName == null) throw new ArgumentNullException("longName");
+
+            this.shortName = shortName;
+            this.longName = longName ;
             this.setName = string.Empty;
             this.min = -1;
             this.max = -1;
@@ -55,6 +69,15 @@ namespace CommandLine
         /// <summary>
         /// Initializes a new instance of the <see cref="CommandLine.OptionAttribute"/> class.
         /// </summary>
+        /// <param name="longName">The long name of the option.</param>
+        public OptionAttribute(string[] longName)
+            : this(string.Empty, longName)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CommandLine.OptionAttribute"/> class.
+        /// </summary>
         /// <param name="shortName">The short name of the option.</param>
         /// <param name="longName">The long name of the option or null if not used.</param>
         public OptionAttribute(char shortName, string longName)
@@ -74,7 +97,7 @@ namespace CommandLine
         /// <summary>
         /// Gets long name of this command line option. This name is usually a single english word.
         /// </summary>
-        public string LongName
+        public string[] LongName
         {
             get { return this.longName; }
         }

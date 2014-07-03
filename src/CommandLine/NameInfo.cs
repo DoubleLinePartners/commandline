@@ -1,6 +1,7 @@
 ﻿// Copyright 2005-2013 Giacomo Stelluti Scala & Contributors. All rights reserved. See doc/License.md in the project root for license information.
 
 using System;
+using System.Linq;
 using CommandLine.Core;
 
 namespace CommandLine
@@ -14,11 +15,20 @@ namespace CommandLine
         /// Represents an empty name information. Used when <see cref="CommandLine.Error"/> are tied to values,
         /// rather than options.
         /// </summary>
-        public static readonly NameInfo EmptyName = new NameInfo(string.Empty, string.Empty);
-        private readonly string longName;
+        public static readonly NameInfo EmptyName = new NameInfo(string.Empty, new []{ string.Empty});
+        private readonly string[] longName;
         private readonly string shortName;
 
         internal NameInfo(string shortName, string longName)
+        {
+            if (shortName == null) throw new ArgumentNullException("shortName");
+            if (longName == null) throw new ArgumentNullException("longName");
+
+            this.longName = new []{ longName};
+            this.shortName = shortName;
+        }
+
+        internal NameInfo(string shortName, string[] longName)
         {
             if (shortName == null) throw new ArgumentNullException("shortName");
             if (longName == null) throw new ArgumentNullException("longName");
@@ -38,7 +48,7 @@ namespace CommandLine
         /// <summary>
         /// Gets the long name of the name information.
         /// </summary>
-        public string LongName
+        public string[] LongName
         {
             get { return this.longName; }
         }
@@ -51,18 +61,18 @@ namespace CommandLine
             get
             {
                 return this.ShortName.Length > 0 && this.LongName.Length > 0
-                           ? this.ShortName + ", " + this.LongName
+                           ? this.ShortName + ", " + String.Join(", ", this.LongName)
                            : this.ShortName.Length > 0
                                 ? this.ShortName
-                                : this.LongName;
+                                : String.Join(", ", this.LongName);
             }
         }
 
         internal static NameInfo FromOptionSpecification(OptionSpecification specification)
         {
             return new NameInfo(
-                specification.LongName,
-                specification.ShortName);
+                specification.ShortName,
+                specification.LongName);
         }
 
         internal static NameInfo FromSpecification(Specification specification)
