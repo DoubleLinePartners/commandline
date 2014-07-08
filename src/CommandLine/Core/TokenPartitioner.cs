@@ -19,13 +19,13 @@ namespace CommandLine.Core
                 Func<string, Maybe<Tuple<DescriptorType, Maybe<int>>>> typeLookup)
         {
             var switches = PartitionSwitches(tokens, typeLookup);
-            var tokensExceptSwitches = tokens.Except(switches);
+            var tokensExceptSwitches = tokens.Where(x => switches.All(y => y != x));
             var scalars = PartitionScalars(tokensExceptSwitches, typeLookup);
-            var tokensExceptSwitchesAndScalars = tokensExceptSwitches.Except(scalars);
+            var tokensExceptSwitchesAndScalars = tokensExceptSwitches.Where(x => scalars.All(y => y != x));
             var sequences = PartitionSequences(tokensExceptSwitchesAndScalars, typeLookup);
-            var tokensExceptSwitchesAndScalarsAndSeq = tokensExceptSwitchesAndScalars.Except(sequences);
+            var tokensExceptSwitchesAndScalarsAndSeq = tokensExceptSwitchesAndScalars.Where(x => sequences.All(y => y != x));
             var values = tokensExceptSwitchesAndScalarsAndSeq.Where(v => v.IsValue());
-            var errors = tokensExceptSwitchesAndScalarsAndSeq.Except(values);
+            var errors = tokensExceptSwitchesAndScalarsAndSeq.Where(x => values.All(y => y != x));
 
             return Tuple.Create(
                     switches.Select(t => CreateValue(t.Text,"true"))
