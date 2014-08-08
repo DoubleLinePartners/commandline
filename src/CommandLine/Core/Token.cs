@@ -28,6 +28,10 @@ namespace CommandLine.Core
         {
             if (text == null) throw new ArgumentNullException("text");
 
+            if (text.StartsWith("\"") && text.EndsWith("\"") ||
+                text.StartsWith("'") && text.EndsWith("'"))
+                text = text.Substring(1, text.Length - 2);
+
             return new Token(TokenType.Value, text);
         }
 
